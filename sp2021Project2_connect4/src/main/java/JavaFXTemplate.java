@@ -42,7 +42,7 @@ public class JavaFXTemplate extends Application {
 		// initialize the HashMap
 		sceneMap = new HashMap<String, Scene>();
 		// border title
-		primaryStage.setTitle("Welcome to Project 2");
+		primaryStage.setTitle("Welcome to Git Project 2");
 		// Welcome Message, we can make better later
 		welcomeText = new TextField ("Welcome to Connect 4!");
 		
