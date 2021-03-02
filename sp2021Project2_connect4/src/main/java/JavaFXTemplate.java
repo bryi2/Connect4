@@ -1,4 +1,3 @@
-
 import java.util.HashMap;
 import java.util.Stack;
 
@@ -57,61 +56,78 @@ public class JavaFXTemplate extends Application {
 		
 		// Event Handler for each click
 		checkPosition = new EventHandler<ActionEvent>() {
-			
 			public void handle(ActionEvent event) {
 				GameButton b = (GameButton)event.getSource();
-				
+				int player = b.checkCounter();
+				boolean winner = false;
+				String color; 
+				if (player%2 == 0) { // player 1
+					currPlayer.setText("Player 1");
+					color = "-fx-background-color:red;";
+				} else { // player 2
+					currPlayer.setText("Player 2");
+					color = "-fx-background-color:yellow;";
+				}
 				int row = b.getRow();
 				int column = b.getColumn();
-				//int currentPlayer = gameLogic.getCurrPlayer();
 				// 1st condition
 				// check first if bottom row
-				if(gameLogic.checkIfBottomRow(row)) {
-					// testing but make sure to check player#
-					gameLogic.addLogicBoard(row, column);
-					gameLogic.checkBoard(row,column);
-					
-					//testing pane color change
-					if (gameLogic.getCurrPlayer()==1) {
-					b.setStyle("-fx-background-color:red;");
-					} else {
-					b.setStyle("-fx-background-color:blue;");
-					}
-					
+				if(GameLogic.checkIfBottomRow(row)) {
 					// here we validate  move right away and update everything
+					
+					
+					
+					
 					System.out.println("Yes, its the bottom row");
 					// update button states
 					b.updateValidButtonStates(b, row,column);
-					// change GUI
+					GameLogic.addLogicBoard(row, column);
 					
+					// change GUI
+					b.setStyle(color); // changing color
 					b.setDisable(true);
+					
+					winner = GameLogic.isWinner(GameLogic.getCurrPlayer(), GameLogic.getLogic());
 					// check for WIN/TIE
 					// if win (invoke scene 3)
 					// not a win, add to stack
 					b.addNode(b);
-
+					
+					System.out.println("Counter: " + player);
 					moveDetails.clear();
-					moveDetails.appendText("Player " + gameLogic.getCurrPlayer()+ " [ "+row+","+column + "] is a valid move.");
+					moveDetails.appendText("Player ["+row+","+column + "] is a valid move.");
+					if (winner){
+						if (player == 0){
+							System.out.println("Player YELLOW  won");
+						}else{
+							System.out.println("Player RED won");
+						}
+					}
 				// since not bottom row , we now check if button below it disabled, if yes then were good, if not invalid move
 				} else if (b.checkBelow(arr,(row+1), column)) {
 					System.out.println("Not bottom row, but button below is disabled, valid move");
-					gameLogic.addLogicBoard(row, column);
-					gameLogic.checkBoard(row,column);
-					if (gameLogic.getCurrPlayer()==1) {
-						b.setStyle("-fx-background-color:red;");
-						} else {
-						b.setStyle("-fx-background-color:blue;");
-						}
+					
 					b.updateValidButtonStates(b, row, column);
+					GameLogic.addLogicBoard(row, column);
+					winner = GameLogic.isWinner(GameLogic.getCurrPlayer(), GameLogic.getLogic());
+					b.setStyle(color); // changing color
 					b.setDisable(true);
 					b.addNode(b);
+					if (winner){
+						if (player == 0){
+							System.out.println("Player YELLOW  won");
+						}else{
+							System.out.println("Player RED won");
+						}
+					}
+					System.out.println("Counter: " + player);
 					moveDetails.clear();
-					moveDetails.appendText("Player " + gameLogic.getCurrPlayer() + " [ "+row+","+column + "] is a valid move.");
+					moveDetails.appendText("Player ["+row+","+column + "] is a valid move.");
 				} else {
 					// invalid move
 					moveDetails.clear();
 					moveDetails.appendText("Player ["+row+","+column + "] is NOT a valid move. Pick Again!");
-					//System.out.println("Player ["+row+","+column + "] is NOT a valid move. Pick Again!");
+					
 				}
 			}
 		};
@@ -121,12 +137,22 @@ public class JavaFXTemplate extends Application {
 			GameButton x = GameButton.reverse.pop();
 			System.out.println("heres the previous row and col: " + x.getRow() + x.getColumn());
 			// update the GUI to the color
+			x.setStyle ("-fx-base: # f4f162");
+			int player = x.checkCounter();
+			String color; 
+			if (player%2 == 0) { // player 1
+				currPlayer.setText("Player 1");
+				color = "-fx-background-color:red;";
+			} else { // player 2
+				currPlayer.setText("Player 2");
+				color = "-fx-background-color:yellow;";
+			}
+			x.setCountMinus();
 			// update the previous buttons info
 			int row = x.getRow();
 			int column = x.getColumn();
 			x.changeDisable(false);
 			x.setDisable(false);
-			
 			
 		} else {
 			System.out.println("Sorry no more take backs! Choose a Spot!");
@@ -168,9 +194,8 @@ public class JavaFXTemplate extends Application {
 				
 				GameButton b1 = new GameButton(i,j);
 				// set default button color
-				
 				b1.setMinSize(40,40);
-				b1.setStyle("-fx-background-color:lightgrey;");
+				//b1.setStyle("-fx-background-color:orange;");
 				// Even Handler when clicked = checkPosition
 				b1.setOnAction(checkPosition);
 				arr[i][j] = b1;
@@ -181,12 +206,9 @@ public class JavaFXTemplate extends Application {
 	
 	// 3 scenes : welcome, main, win/tie
 	public Scene createWelcomeScene() {
-		
-		
 		BorderPane pane = new BorderPane();
 		// sets how much space you want around all sides of screen
 		pane.setPadding(new Insets(200));
-
 		// vertical placement order
 		VBox paneCenter = new VBox(10, welcomeText );
 		// pane placement
@@ -194,14 +216,10 @@ public class JavaFXTemplate extends Application {
 		pane.setBottom(playGameButton);
 		// pane color
 		pane.setStyle("-fx-background-colo: blue;");
-		
-		
 		return new Scene(pane, 700,800);
 	}
 	
 	public Scene mainGameScene() {
-		
-		
 		gridpane = new GridPane();
 		newGrid(gridpane);
 
@@ -209,6 +227,8 @@ public class JavaFXTemplate extends Application {
 		currPlayer = new TextField();
 		currPlayer.setPrefWidth(80);
 		currPlayer.setEditable(false);
+		currPlayer.setText("Player 1"); // begin with player 1
+		
 		moveDetails = new TextField();
 		moveDetails.setPrefWidth(100);
 		moveDetails.setEditable(false);
