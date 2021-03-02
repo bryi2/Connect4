@@ -63,9 +63,21 @@ public class JavaFXTemplate extends Application {
 				
 				int row = b.getRow();
 				int column = b.getColumn();
+				//int currentPlayer = gameLogic.getCurrPlayer();
 				// 1st condition
 				// check first if bottom row
 				if(gameLogic.checkIfBottomRow(row)) {
+					// testing but make sure to check player#
+					gameLogic.addLogicBoard(row, column);
+					gameLogic.checkBoard(row,column);
+					
+					//testing pane color change
+					if (gameLogic.getCurrPlayer()==1) {
+					b.setStyle("-fx-background-color:red;");
+					} else {
+					b.setStyle("-fx-background-color:blue;");
+					}
+					
 					// here we validate  move right away and update everything
 					System.out.println("Yes, its the bottom row");
 					// update button states
@@ -77,16 +89,24 @@ public class JavaFXTemplate extends Application {
 					// if win (invoke scene 3)
 					// not a win, add to stack
 					b.addNode(b);
+
 					moveDetails.clear();
-					moveDetails.appendText("Player ["+row+","+column + "] is a valid move.");
+					moveDetails.appendText("Player " + gameLogic.getCurrPlayer()+ " [ "+row+","+column + "] is a valid move.");
 				// since not bottom row , we now check if button below it disabled, if yes then were good, if not invalid move
 				} else if (b.checkBelow(arr,(row+1), column)) {
 					System.out.println("Not bottom row, but button below is disabled, valid move");
+					gameLogic.addLogicBoard(row, column);
+					gameLogic.checkBoard(row,column);
+					if (gameLogic.getCurrPlayer()==1) {
+						b.setStyle("-fx-background-color:red;");
+						} else {
+						b.setStyle("-fx-background-color:blue;");
+						}
 					b.updateValidButtonStates(b, row, column);
 					b.setDisable(true);
 					b.addNode(b);
 					moveDetails.clear();
-					moveDetails.appendText("Player ["+row+","+column + "] is a valid move.");
+					moveDetails.appendText("Player " + gameLogic.getCurrPlayer() + " [ "+row+","+column + "] is a valid move.");
 				} else {
 					// invalid move
 					moveDetails.clear();
@@ -150,7 +170,7 @@ public class JavaFXTemplate extends Application {
 				// set default button color
 				
 				b1.setMinSize(40,40);
-				b1.setStyle("-fx-background-color:orange;");
+				b1.setStyle("-fx-background-color:lightgrey;");
 				// Even Handler when clicked = checkPosition
 				b1.setOnAction(checkPosition);
 				arr[i][j] = b1;

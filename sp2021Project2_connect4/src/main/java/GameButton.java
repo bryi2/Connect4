@@ -50,10 +50,11 @@ public class GameButton extends Button {
 	// call to add valid node(button) to stack
 	public void addNode (GameButton button) {
 
-		System.out.println("right after if:");
+		//System.out.println("right after if:");
 		reverse.push(button);
-		System.out.println("adding button to stack details: " + button.getRow() + button.getColumn());
-		System.out.println("Size of Stack: " + reverse.size());
+		//System.out.println("adding button to stack details: " + button.getRow() + button.getColumn());
+		//System.out.println("Size of Stack: " + reverse.size());
+		//System.out.println
 		
 		
 	}
