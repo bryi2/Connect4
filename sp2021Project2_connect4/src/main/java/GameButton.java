@@ -11,14 +11,13 @@ public class GameButton extends Button {
 	private int row;
 	private int column;
 	// use this to determine player. %2 : 0 = p1, 1 = p2
-	private int counter;
+	private static int counter;
 	// static so stack info travels across all classes
 	public static Stack<GameButton> reverse = new Stack<GameButton>();
 	
 	// constructor
 	GameButton(int row, int column) {
-		
-		this.counter = 0;
+		this.counter = 1;
 		this.row = row;
 		this.column = column;
 		this.disabled = false;
@@ -50,15 +49,13 @@ public class GameButton extends Button {
 	// call to add valid node(button) to stack
 	public void addNode (GameButton button) {
 
-		//System.out.println("right after if:");
+		System.out.println("right after if:");
 		reverse.push(button);
-		//System.out.println("adding button to stack details: " + button.getRow() + button.getColumn());
-		//System.out.println("Size of Stack: " + reverse.size());
-		//System.out.println
+		System.out.println("adding button to stack details: " + button.getRow() + button.getColumn());
+		System.out.println("Size of Stack: " + reverse.size());
 		
 		
 	}
-
 	
 	public int getRow() {
 		return this.row;
@@ -86,6 +83,9 @@ public class GameButton extends Button {
 	
 	public void setCount() {
 		this.counter++;
+	}
+	public void setCountMinus() {
+		this.counter--;
 	}
 	
 	
