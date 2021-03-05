@@ -1,3 +1,4 @@
+
 import java.util.HashMap;
 import java.util.Stack;
 import javafx.animation.PauseTransition;
@@ -8,19 +9,30 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundPosition;
+import javafx.scene.layout.BackgroundRepeat;
+import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class JavaFXTemplate extends Application {
 	
-	TextField welcomeText, currPlayer, moveDetails, resultText;
+	TextField  currPlayer, moveDetails, resultText;
+	
+	// label so we dont have borders around text
+	Label welcomeScreen;
 	HashMap<String, Scene> sceneMap;
 	
 	GridPane gridpane;
@@ -50,7 +62,7 @@ public class JavaFXTemplate extends Application {
 		// button to access next GUI (main game)
 		playGameButton = new Button("Play Connect Four!");
 		
-		
+	
 		playAgain = new Button("Play Again!");
 		theme1 = new MenuItem("Theme 1");
 		theme2 = new MenuItem("Theme 2");
@@ -65,7 +77,7 @@ public class JavaFXTemplate extends Application {
 		// border title
 		primaryStage.setTitle("Welcome to Git Project 2");
 		// Welcome Message, we can make better later
-		welcomeText = new TextField ("Welcome to Connect 4!");
+		//welcomeText = new TextField ("Welcome to Connect 4!");
 		
 		
 		// Event Handler for each click
@@ -272,15 +284,25 @@ public class JavaFXTemplate extends Application {
 	public Scene createWelcomeScene() {
 		BorderPane pane = new BorderPane();
 		// sets how much space you want around all sides of screen
-		pane.setPadding(new Insets(200));
+		pane.setPadding(new Insets(100));
+		
+		welcomeScreen = new Label("Welcome to Connect 4");
+		welcomeScreen.setFont(new Font("Arial", 20));
+	
+		
+		Image image = new Image ("connect4.jpg");
+		BackgroundSize bSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false);
+		Background background = new Background(new BackgroundImage(image, BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.CENTER,bSize));
 		// vertical placement order
-		VBox paneCenter = new VBox(10, welcomeText );
+		VBox paneCenter = new VBox(10, welcomeScreen);
 		// pane placement
-		pane.setCenter(paneCenter);
+		pane.setBackground(background);
+		//pane.setCenter(paneCenter);
 		pane.setBottom(playGameButton);
+		pane.setTop(paneCenter);
 		// pane color
 		pane.setStyle("-fx-background-colo: blue;");
-		return new Scene(pane, 700,800);
+		return new Scene(pane, 800,800);
 	}
 	
 	public Scene mainGameScene() {
