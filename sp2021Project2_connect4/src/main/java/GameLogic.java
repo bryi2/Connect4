@@ -144,4 +144,10 @@ public class GameLogic  {
 		    }
 		}
 	}
+	//testing purposes
+	public static int getCountPlayer() {
+		
+		return currentPlayer;
+	}
+
 }

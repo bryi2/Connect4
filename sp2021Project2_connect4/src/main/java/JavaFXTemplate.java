@@ -32,7 +32,7 @@ public class JavaFXTemplate extends Application {
 	TextField  currPlayer, moveDetails, resultText;
 	
 	// label so we dont have borders around text
-	Label welcomeScreen;
+	Label welcomeScreen, howToPlay;
 	HashMap<String, Scene> sceneMap;
 	
 	GridPane gridpane;
@@ -226,6 +226,13 @@ public class JavaFXTemplate extends Application {
 					}
 		});
 		
+		howTo.setOnAction(new EventHandler<ActionEvent>() {
+			
+			public void handle(ActionEvent t) {
+				howToPlay.setText("Welcome to Connect 4: Just like the game name the objective is to get 4 in a row. The rows can be done vertically, horizontally or diagonlly. Each turn, the player will get the chance to drop and make the row of his checkers");
+			}
+		});
+		
 		//create handler for the exit option in Options
 		exit.setOnAction(new EventHandler<ActionEvent>() {
 				public void handle (ActionEvent t) {
@@ -284,7 +291,7 @@ public class JavaFXTemplate extends Application {
 	public Scene createWelcomeScene() {
 		BorderPane pane = new BorderPane();
 		// sets how much space you want around all sides of screen
-		pane.setPadding(new Insets(100));
+		pane.setPadding(new Insets(50));
 		
 		welcomeScreen = new Label("Welcome to Connect 4");
 		welcomeScreen.setFont(new Font("Arial", 20));
@@ -329,17 +336,24 @@ public class JavaFXTemplate extends Application {
 		
 		//gridpane.setAlignment(center);
 		BorderPane pane = new BorderPane();
+		
 		// menuBar to top of borderpane
 		pane.setTop(menuBar);
+		//pane.setTop(howToPlay);
+		
+		// create label for how to play text
+		howToPlay = new Label("checking label");
+		howToPlay.setFont(new Font("Arial",15));
+		//Vbox borderTop = new Vbox(menuBar, howToPlay);
 		
 		// for now its textfield, but were going to use labels so the text just appears in the background naturally instead of text with borders
 		currPlayer = new TextField();
-		currPlayer.setPrefWidth(80);
+		currPlayer.setPrefWidth(50);
 		currPlayer.setEditable(false);
 		currPlayer.setText("Player 1"); // begin with player 1
 		
 		moveDetails = new TextField();
-		moveDetails.setPrefWidth(100);
+		moveDetails.setPrefWidth(50);
 		moveDetails.setEditable(false);
 		
 		
@@ -350,7 +364,6 @@ public class JavaFXTemplate extends Application {
 		VBox paneCenter = new VBox(currPlayer, moveDetails,gridpane);
 		// center the gridpane 
 		paneCenter.setAlignment(Pos.CENTER);
-		
 		pane.setCenter(paneCenter);
 		
 		return new Scene(pane, 800,800);
