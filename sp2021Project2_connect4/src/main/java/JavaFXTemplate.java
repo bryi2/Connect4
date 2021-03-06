@@ -34,25 +34,22 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class JavaFXTemplate extends Application {
-	
-	TextField  resultText;
-	
-	// label so we dont have borders around text
+	TextField resultText;
+	// label so we don't have borders around text
 	Label welcomeScreen, howToPlay, currPlayer, moveDetails, result;
-	
 	HashMap<String, Scene> sceneMap;
-	
 	BorderPane pane;
-	
 	GridPane gridpane;
 	MenuBar menuBar;
 	Menu menuGamePlay, menuThemes, menuOptions;
 	//every time user clicks location
 	EventHandler<ActionEvent> checkPosition;
+	// buttons for grid pane
 	GameButton[][] arr;
-
+	// welcome screen + result
 	Button playGameButton,playAgain;
-	MenuItem exit, reverse,newGame,howTo,theme1,theme2;
+	// sub menu
+	MenuItem exit, reverse,newGame,howTo,theme1,theme2,defaultTheme;
 	// using for pause transition between actions
 	PauseTransition pause = new PauseTransition(Duration.seconds(4));
 	PauseTransition howToPlayPause = new PauseTransition(Duration.seconds(15));
@@ -71,33 +68,32 @@ public class JavaFXTemplate extends Application {
 		arr = new GameButton [6][7];
 		// button to access next GUI (main game)
 		playGameButton = new Button("Play Connect Four!");
-		
-	
+		// button for result screen
 		playAgain = new Button("Play Again!");
+		// sub Menu
+		defaultTheme = new MenuItem("Default Theme");
 		theme1 = new MenuItem("Theme 1");
 		theme2 = new MenuItem("Theme 2");
 		howTo = new MenuItem("How To Play?");
 		exit = new MenuItem("Exit");
 		newGame = new MenuItem("New Game");
 		reverse = new MenuItem("Reverse Move");
-		
-		
 		// initialize the HashMap
 		sceneMap = new HashMap<String, Scene>();
 		// border title
 		primaryStage.setTitle("Welcome to Git Project 2");
-		// Welcome Message, we can make better later
-		//welcomeText = new TextField ("Welcome to Connect 4!");
-		
-		
 		// Event Handler for each click
 		checkPosition = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent event) {
 				GameButton b = (GameButton)event.getSource();
 				// store current player 
 				int player = GameLogic.getCurrPlayer();
+				int row = b.getRow();
+				int column = b.getColumn();
 				boolean winner = false;
-				String color; 
+				String color;
+			
+				
 				if (player == 1) { // player 1
 					currPlayer.setText("Current Player: Player 1");
 					color = "-fx-background-color:red;";
@@ -105,38 +101,32 @@ public class JavaFXTemplate extends Application {
 					currPlayer.setText("Current Player: Player 2");
 					color = "-fx-background-color:yellow;";
 				}
-				int row = b.getRow();
-				int column = b.getColumn();
-				// 1st condition
+
 				// check first if bottom row
 				if(GameLogic.checkIfBottomRow(row)) {
-					// here we validate  move right away and update everything
 					// update button states
 					b.updateValidButtonStates(b, row,column);
 					GameLogic.addLogicBoard(row, column);
 					// change GUI
 					b.setStyle(color); // changing color
 					b.setDisable(true);
-					
 					// check for WIN/TIE
 					winner = GameLogic.isWinner(GameLogic.getCurrPlayer(), GameLogic.getLogic());
-					// not a win, add to stack
+					// add to stack
 					b.addNode(b);
-					// using labels theres no clear function so use empty string set
+					// using labels there is no clear function so use empty string set
 					moveDetails.setText("");
 					moveDetails.setText("Player " + prevPlayer(player) + " ["+row+","+column + "] is a valid move.");
-
-
-				// since not bottom row , we now check if button below it disabled, if yes then were good, if not invalid move
+					// since not bottom row , we now check if button below it disabled, if yes then were good, if not invalid move
 				} else if (b.checkBelow(arr,(row+1), column)) {
-					System.out.println("Not bottom row, but button below is disabled, valid move");
+					//System.out.println("Not bottom row, but button below is disabled, valid move");
 					b.updateValidButtonStates(b, row, column);
 					GameLogic.addLogicBoard(row, column);
 					b.setStyle(color); // changing color
 					b.setDisable(true);
 					// check for win 
 					winner = GameLogic.isWinner(GameLogic.getCurrPlayer(), GameLogic.getLogic());
-					
+					// add stack
 					b.addNode(b);
 					//System.out.println("Counter: " + player); 
 					moveDetails.setText("");
@@ -148,9 +138,9 @@ public class JavaFXTemplate extends Application {
 					
 				}
 				
-				// we have to envoke the scene instead of just printing it out
+				// we have to invoke the scene instead of just printing it out
 				if (winner || GameButton.reverse.size() > 41){
-					// prob should pause the scene before showing result
+					// should pause the scene before showing result
 					int[][] winSet = GameLogic.getWinningSet();;
 					boolean isWin = winner;
 					if (winner) {
@@ -185,9 +175,6 @@ public class JavaFXTemplate extends Application {
 						}
 					});
 					pause.play();
-					
-					
-					
 				}
 			}
 		};
@@ -211,8 +198,6 @@ public class JavaFXTemplate extends Application {
 			}
 			//GameLogic.changeCurrPlayer();
 			// update the previous buttons info
-			int row = x.getRow();
-			int column = x.getColumn();
 			GameLogic.removeLogicBoard(x.getRow(), x.getColumn());
 			x.changeDisable(false);
 			x.setDisable(false);
@@ -230,53 +215,46 @@ public class JavaFXTemplate extends Application {
 		theme2.setOnAction(e -> {
 			pane.setBackground(new Background(new BackgroundFill(Color.CADETBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
 		});
+		defaultTheme.setOnAction(e -> {
+			pane.setBackground(new Background(new BackgroundFill(Color.DARKSEAGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
+		});
 		
 		
-		// newGame for options menubar
-		newGame.setOnAction(new EventHandler<ActionEvent>() {
-					public void handle(ActionEvent t) {
-						moveDetails.setText("");
-						gridpane.getChildren().clear();
-						newGrid(gridpane);
-						GameLogic.clearLogicBoard();
-						GameButton.reverse.clear();
-						primaryStage.setScene(sceneMap.get("play"));
-					}
+		// newGame for options menu bar
+		newGame.setOnAction(e -> {
+			
+			moveDetails.setText("");
+			gridpane.getChildren().clear();
+			newGrid(gridpane);
+			GameLogic.clearLogicBoard();
+			GameButton.reverse.clear();
+			primaryStage.setScene(sceneMap.get("play"));
+					
 		});
 		// how to play menu bar option
-		howTo.setOnAction(new EventHandler<ActionEvent>() {
-			
-			public void handle(ActionEvent t) {
-				// wraps text to new line so it doesnt get chopped off
-				howToPlay.setWrapText(true);
-				howToPlay.setText("Welcome to Connect 4: Just like the game name the objective is to get 4 in a row. The rows can be done vertically, horizontally or diagonlly. "
-						+ "Each turn, the player will get the chance to drop and make the row of his checkers. If you are the first player to get four of your checkers in a row, you win."
-						+ "Also, during your turn you have the option to reverse a move located in the Gameplay menu bar. However, choosing to reverse a move will behave as a turn and the player"
-						+ "prior to the most recent move will be chose to make a move.");
-				
-				// pause then erase text
+		howTo.setOnAction(e -> {
+			// allows the text to go next line and not get chopped off
+			howToPlay.setWrapText(true);
+			howToPlay.setText("Welcome to Connect 4: Just like the game name the objective is to get 4 in a row. The rows can be done vertically, horizontally or diagonlly. "
+					+ "Each turn, the player will get the chance to drop and make the row of his checkers. If you are the first player to get four of your checkers in a row, you win."
+					+ "Also, during your turn you have the option to reverse a move located in the Gameplay menu bar. However, choosing to reverse a move will behave as a turn and the player"
+					+ "prior to the most recent move will be chose to make a move.");
+			// set a pause for 15 seconds and then remove game play instructions
+			howToPlayPause.setOnFinished(s -> {
+				// set to blank screen
+				howToPlay.setText("");
+			});
 				howToPlayPause.play();
-				//howToPlay.setText("");
-			}
 		});
 		
 		//create handler for the exit option in Options
-		exit.setOnAction(new EventHandler<ActionEvent>() {
-				public void handle (ActionEvent t) {
-					System.exit(0);
-				}
+		exit.setOnAction(e -> {
+			System.exit(0);
 		});
-
-		
 		// create even handler for PlayGame Button from welcome screen and to play again after win/tie
 		playGameButton.setOnAction(e -> primaryStage.setScene(sceneMap.get("play")));
-		
-		
 		// create an event handler for playAgain button after the result scene
 		playAgain.setOnAction(e -> primaryStage.setScene(sceneMap.get("play")));
-		
-		
-		
 		// placing scenes inside HashMap, 1 more needed the win/tie 
 		sceneMap.put("welcome", createWelcomeScene());
 		sceneMap.put("play",  mainGameScene());
@@ -286,7 +264,6 @@ public class JavaFXTemplate extends Application {
 		primaryStage.setScene(sceneMap.get("welcome"));
 		primaryStage.show();
 	}
-	
 
 	// function to create and add grid 
 	public void newGrid( GridPane grid) {
@@ -318,7 +295,7 @@ public class JavaFXTemplate extends Application {
 		menuOptions = new Menu("Options");
 		// add pull down options according to parent menu
 		menuOptions.getItems().addAll(howTo,newGame,exit);
-		menuThemes.getItems().addAll(theme1,theme2);
+		menuThemes.getItems().addAll(defaultTheme,theme1,theme2);
 		menuGamePlay.getItems().addAll(reverse);
 		// add parent menu
 		menuBar.getMenus().addAll(menuGamePlay, menuThemes, menuOptions);
@@ -347,7 +324,7 @@ public class JavaFXTemplate extends Application {
 		welcomePane.setBottom(playGameButton);
 		welcomePane.setTop(paneCenter);
 	
-		return new Scene(welcomePane, 800,800);
+		return new Scene(welcomePane, 1000,550);
 	}
 	
 	public Scene mainGameScene() {
@@ -364,6 +341,7 @@ public class JavaFXTemplate extends Application {
 		//gridpane.setAlignment(center);
 	    pane = new BorderPane();
 		
+	    pane.setBackground(new Background(new BackgroundFill(Color.DARKSEAGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
 		// menuBar to top of border pane
 		pane.setTop(menuBar);
 	
@@ -410,7 +388,7 @@ public class JavaFXTemplate extends Application {
 		pane.setBottom(playAgain);
 	
 		
-		return new Scene(pane, 800,800);
+		return new Scene(pane, 800,540);
 	}
 	
 
