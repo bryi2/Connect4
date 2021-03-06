@@ -36,7 +36,7 @@ import javafx.util.Duration;
 public class JavaFXTemplate extends Application {
 	TextField resultText;
 	// label so we don't have borders around text
-	Label welcomeScreen, howToPlay, currPlayer, moveDetails, result;
+	Label welcomeScreen, howToPlay, currPlayer, moveDetails, result, emptyStack;
 	HashMap<String, Scene> sceneMap;
 	BorderPane pane;
 	GridPane gridpane;
@@ -53,6 +53,7 @@ public class JavaFXTemplate extends Application {
 	// using for pause transition between actions
 	PauseTransition pause = new PauseTransition(Duration.seconds(4));
 	PauseTransition howToPlayPause = new PauseTransition(Duration.seconds(15));
+	PauseTransition noMoreReverse = new PauseTransition(Duration.seconds(4));
 	
 	
 	
@@ -78,6 +79,7 @@ public class JavaFXTemplate extends Application {
 		exit = new MenuItem("Exit");
 		newGame = new MenuItem("New Game");
 		reverse = new MenuItem("Reverse Move");
+		
 		// initialize the HashMap
 		sceneMap = new HashMap<String, Scene>();
 		// border title
@@ -165,14 +167,16 @@ public class JavaFXTemplate extends Application {
 						gridpane.getChildren().clear();
 						newGrid(gridpane);
 						GameButton.reverse.clear();
+						// changed to player # because if they change theme the colors change according to background
+						// display result
 						GameLogic.clearLogicBoard();
 						if (player == 1){
-							resultText.setText("Player RED  won");
+							result.setText("Player 1  won");
 						} else {
-							resultText.setText("Player YELLOW won");
+							result.setText("Player 2 won");
 						}
 						if (!isWin) {
-							resultText.setText("Game was a tie!");
+							result.setText("Game was a tie!");
 						}
 					});
 					pause.play();
@@ -188,13 +192,14 @@ public class JavaFXTemplate extends Application {
 			// update the GUI to the color
 			// we get an error here on java fx , TA said to just use background color we can change later
 			x.setStyle ("-fx-base: # f4f162");
+			
 			int player = GameLogic.getCurrPlayer();
 			String color; 
 			if (player == 1) { // player 1
-				currPlayer.setText("Player 1");
+				currPlayer.setText("Current Player: Player 1");
 				color = "-fx-background-color:red;";
 			} else { // player 2
-				currPlayer.setText("Player 2");
+				currPlayer.setText("Current Player: Player 2");
 				color = "-fx-background-color:yellow;";
 			}
 			//GameLogic.changeCurrPlayer();
@@ -204,7 +209,13 @@ public class JavaFXTemplate extends Application {
 			x.setDisable(false);
 			
 		} else {
-			System.out.println("Sorry no more take backs! Choose a Spot!");
+				// error message for no more reverse + pause + erase
+				emptyStack.setText("Sorry, no moves to reverse. Choose a spot.");
+			noMoreReverse.setOnFinished(x -> {
+				emptyStack.setText("");
+			});
+			noMoreReverse.play();
+			//System.out.println("Sorry no more take backs! Choose a Spot!");
 		}
 		});
 		
@@ -224,7 +235,9 @@ public class JavaFXTemplate extends Application {
 		// newGame for options menu bar
 		newGame.setOnAction(e -> {
 			
-			moveDetails.setText("");
+			moveDetails.setText("Move Details will Post Here");
+			currPlayer.setText("Current Player: Player 1");
+			GameLogic.currentPlayer = 0;
 			gridpane.getChildren().clear();
 			newGrid(gridpane);
 			GameLogic.clearLogicBoard();
@@ -255,7 +268,13 @@ public class JavaFXTemplate extends Application {
 		// create even handler for PlayGame Button from welcome screen and to play again after win/tie
 		playGameButton.setOnAction(e -> primaryStage.setScene(sceneMap.get("play")));
 		// create an event handler for playAgain button after the result scene
-		playAgain.setOnAction(e -> primaryStage.setScene(sceneMap.get("play")));
+		playAgain.setOnAction(e -> {
+			// reset count to 0
+			GameLogic.currentPlayer = 0;
+			currPlayer.setText("Current Player: Player 1");
+			moveDetails.setText("Move Details will Post Here");
+			primaryStage.setScene(sceneMap.get("play"));
+		});
 		// placing scenes inside HashMap, 1 more needed the win/tie 
 		sceneMap.put("welcome", createWelcomeScene());
 		sceneMap.put("play",  mainGameScene());
@@ -351,13 +370,17 @@ public class JavaFXTemplate extends Application {
 		howToPlay = new Label("");
 		howToPlay.setFont(new Font("Arial",18));
 		
-		currPlayer = new Label("Current Player: Player 1");
+		currPlayer = new Label();
 		currPlayer.setFont(new Font("Arial", 18));
+		currPlayer.setText("Current Player: Player 1");
 		
 		moveDetails = new Label("Move Details will post here.");
 		moveDetails.setFont(new Font("Arial", 18));
 		
-		VBox borderTop = new VBox(menuBar, howToPlay, currPlayer,moveDetails);
+		emptyStack = new Label();
+		emptyStack.setFont(new Font("Arial", 18));
+		
+		VBox borderTop = new VBox(menuBar, howToPlay, currPlayer,moveDetails,emptyStack);
 		// centering
 		gridpane.setAlignment(Pos.CENTER);
 		
