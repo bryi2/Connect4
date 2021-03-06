@@ -1,4 +1,5 @@
 
+import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Stack;
 import javafx.animation.PauseTransition;
@@ -7,6 +8,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -15,25 +17,32 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class JavaFXTemplate extends Application {
 	
-	TextField  currPlayer, moveDetails, resultText;
+	TextField  resultText;
 	
 	// label so we dont have borders around text
-	Label welcomeScreen, howToPlay;
+	Label welcomeScreen, howToPlay, currPlayer, moveDetails, result;
+	
 	HashMap<String, Scene> sceneMap;
+	
+	BorderPane pane;
 	
 	GridPane gridpane;
 	MenuBar menuBar;
@@ -46,6 +55,7 @@ public class JavaFXTemplate extends Application {
 	MenuItem exit, reverse,newGame,howTo,theme1,theme2;
 	// using for pause transition between actions
 	PauseTransition pause = new PauseTransition(Duration.seconds(4));
+	PauseTransition howToPlayPause = new PauseTransition(Duration.seconds(15));
 	
 	
 	
@@ -84,14 +94,15 @@ public class JavaFXTemplate extends Application {
 		checkPosition = new EventHandler<ActionEvent>() {
 			public void handle(ActionEvent event) {
 				GameButton b = (GameButton)event.getSource();
+				// store current player 
 				int player = GameLogic.getCurrPlayer();
 				boolean winner = false;
 				String color; 
 				if (player == 1) { // player 1
-					currPlayer.setText("Player 1");
+					currPlayer.setText("Current Player: Player 1");
 					color = "-fx-background-color:red;";
 				} else { // player 2
-					currPlayer.setText("Player 2");
+					currPlayer.setText("Current Player: Player 2");
 					color = "-fx-background-color:yellow;";
 				}
 				int row = b.getRow();
@@ -100,7 +111,6 @@ public class JavaFXTemplate extends Application {
 				// check first if bottom row
 				if(GameLogic.checkIfBottomRow(row)) {
 					// here we validate  move right away and update everything
-					System.out.println("Yes, its the bottom row");
 					// update button states
 					b.updateValidButtonStates(b, row,column);
 					GameLogic.addLogicBoard(row, column);
@@ -110,14 +120,12 @@ public class JavaFXTemplate extends Application {
 					
 					// check for WIN/TIE
 					winner = GameLogic.isWinner(GameLogic.getCurrPlayer(), GameLogic.getLogic());
-					// if win (invoke scene 3)
-					
 					// not a win, add to stack
 					b.addNode(b);
-					
-					System.out.println("Counter: " + player);
-					moveDetails.clear();
-					moveDetails.appendText("Player ["+row+","+column + "] is a valid move.");
+					// using labels theres no clear function so use empty string set
+					moveDetails.setText("");
+					moveDetails.setText("Player " + prevPlayer(player) + " ["+row+","+column + "] is a valid move.");
+
 
 				// since not bottom row , we now check if button below it disabled, if yes then were good, if not invalid move
 				} else if (b.checkBelow(arr,(row+1), column)) {
@@ -130,13 +138,13 @@ public class JavaFXTemplate extends Application {
 					winner = GameLogic.isWinner(GameLogic.getCurrPlayer(), GameLogic.getLogic());
 					
 					b.addNode(b);
-					System.out.println("Counter: " + player); 
-					moveDetails.clear();
-					moveDetails.appendText("Player ["+row+","+column + "] is a valid move.");
+					//System.out.println("Counter: " + player); 
+					moveDetails.setText("");
+					moveDetails.setText("Player " + prevPlayer(player)+ " ["+row+","+column + "] is a valid move.");
 				} else {
 					// invalid move
-					moveDetails.clear();
-					moveDetails.appendText("Player ["+row+","+column + "] is NOT a valid move. Pick Again!");
+					moveDetails.setText("");
+					moveDetails.setText("Player " + prevPlayer(player) + " ["+row+","+column + "] is NOT a valid move. Pick Again!");
 					
 				}
 				
@@ -162,7 +170,7 @@ public class JavaFXTemplate extends Application {
 				            for (int j = 0; (winSet[i] != null && j < winSet[i].length); j++)
 				                System.out.print(winSet[i][j] + " ");
 				        }
-						moveDetails.clear();
+						moveDetails.setText("");
 						gridpane.getChildren().clear();
 						newGrid(gridpane);
 						GameButton.reverse.clear();
@@ -184,7 +192,7 @@ public class JavaFXTemplate extends Application {
 			}
 		};
 		
-		// lambda expression for when clicking reverse during gameplay
+		// lambda expression for when clicking reverse during game play
 		reverse.setOnAction(e-> { if (!GameButton.reverse.empty()) {
 			GameButton x = GameButton.reverse.pop();
 			
@@ -214,10 +222,20 @@ public class JavaFXTemplate extends Application {
 		}
 		});
 		
+		// Themes 1 and 2 we can use setStyle or setBackground, BackgroundFill just fills the whole screen with color
+		theme1.setOnAction(e -> {
+			pane.setBackground(new Background(new BackgroundFill(Color.CORNSILK, CornerRadii.EMPTY, Insets.EMPTY)));
+			});
+		
+		theme2.setOnAction(e -> {
+			pane.setBackground(new Background(new BackgroundFill(Color.CADETBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
+		});
+		
+		
 		// newGame for options menubar
 		newGame.setOnAction(new EventHandler<ActionEvent>() {
 					public void handle(ActionEvent t) {
-						moveDetails.clear();
+						moveDetails.setText("");
 						gridpane.getChildren().clear();
 						newGrid(gridpane);
 						GameLogic.clearLogicBoard();
@@ -225,11 +243,20 @@ public class JavaFXTemplate extends Application {
 						primaryStage.setScene(sceneMap.get("play"));
 					}
 		});
-		
+		// how to play menu bar option
 		howTo.setOnAction(new EventHandler<ActionEvent>() {
 			
 			public void handle(ActionEvent t) {
-				howToPlay.setText("Welcome to Connect 4: Just like the game name the objective is to get 4 in a row. The rows can be done vertically, horizontally or diagonlly. Each turn, the player will get the chance to drop and make the row of his checkers");
+				// wraps text to new line so it doesnt get chopped off
+				howToPlay.setWrapText(true);
+				howToPlay.setText("Welcome to Connect 4: Just like the game name the objective is to get 4 in a row. The rows can be done vertically, horizontally or diagonlly. "
+						+ "Each turn, the player will get the chance to drop and make the row of his checkers. If you are the first player to get four of your checkers in a row, you win."
+						+ "Also, during your turn you have the option to reverse a move located in the Gameplay menu bar. However, choosing to reverse a move will behave as a turn and the player"
+						+ "prior to the most recent move will be chose to make a move.");
+				
+				// pause then erase text
+				howToPlayPause.play();
+				//howToPlay.setText("");
 			}
 		});
 		
@@ -275,96 +302,91 @@ public class JavaFXTemplate extends Application {
 		}
 	}
 	
+	// function for previous player# for move details
+	public int prevPlayer(int currPlayer) {
+		if (currPlayer ==1) {
+			return 2;
+		}
+		return 1;
+		
+	}
 	public void setMenuOptions () {
 		
 		// Menu bar options
 		menuGamePlay = new Menu("Game Play");
 		menuThemes = new Menu("Themes");
 		menuOptions = new Menu("Options");
-	
-	
-		
+		// add pull down options according to parent menu
+		menuOptions.getItems().addAll(howTo,newGame,exit);
+		menuThemes.getItems().addAll(theme1,theme2);
+		menuGamePlay.getItems().addAll(reverse);
+		// add parent menu
+		menuBar.getMenus().addAll(menuGamePlay, menuThemes, menuOptions);
 	}
 	
 	
 	// 3 scenes : welcome, main, win/tie
 	public Scene createWelcomeScene() {
-		BorderPane pane = new BorderPane();
+		BorderPane welcomePane = new BorderPane();
 		// sets how much space you want around all sides of screen
-		pane.setPadding(new Insets(50));
+		welcomePane.setPadding(new Insets(50));
 		
+		// label for intro screen
 		welcomeScreen = new Label("Welcome to Connect 4");
 		welcomeScreen.setFont(new Font("Arial", 20));
 	
-		
+		// create and insert background image
 		Image image = new Image ("connect4.jpg");
 		BackgroundSize bSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false);
 		Background background = new Background(new BackgroundImage(image, BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.CENTER,bSize));
 		// vertical placement order
 		VBox paneCenter = new VBox(10, welcomeScreen);
 		// pane placement
-		pane.setBackground(background);
+		welcomePane.setBackground(background);
 		//pane.setCenter(paneCenter);
-		pane.setBottom(playGameButton);
-		pane.setTop(paneCenter);
-		// pane color
-		pane.setStyle("-fx-background-colo: blue;");
-		return new Scene(pane, 800,800);
+		welcomePane.setBottom(playGameButton);
+		welcomePane.setTop(paneCenter);
+	
+		return new Scene(welcomePane, 800,800);
 	}
 	
 	public Scene mainGameScene() {
 		
-		// add menubar and 3 menu options
+		// add menu bar and 3 menu options
 		menuBar = new MenuBar();
-		// function call, probably dont need i'll fix all this later just testing
+		// setting menu pull down options
 		setMenuOptions();
-
 		
-		// add pulldown option according to parent menu
-		menuOptions.getItems().addAll(howTo,newGame,exit);
-		menuThemes.getItems().addAll(theme1,theme2);
-		menuGamePlay.getItems().addAll(reverse);
-		
-
-		
-		menuBar.getMenus().addAll(menuGamePlay, menuThemes, menuOptions);
-		
-
-		
+		// initialize grid pane with buttons
 		gridpane = new GridPane();
 		newGrid(gridpane);
 		
 		//gridpane.setAlignment(center);
-		BorderPane pane = new BorderPane();
+	    pane = new BorderPane();
 		
-		// menuBar to top of borderpane
+		// menuBar to top of border pane
 		pane.setTop(menuBar);
-		//pane.setTop(howToPlay);
+	
 		
 		// create label for how to play text
-		howToPlay = new Label("checking label");
-		howToPlay.setFont(new Font("Arial",15));
-		//Vbox borderTop = new Vbox(menuBar, howToPlay);
+		howToPlay = new Label("");
+		howToPlay.setFont(new Font("Arial",18));
 		
-		// for now its textfield, but were going to use labels so the text just appears in the background naturally instead of text with borders
-		currPlayer = new TextField();
-		currPlayer.setPrefWidth(50);
-		currPlayer.setEditable(false);
-		currPlayer.setText("Player 1"); // begin with player 1
+		currPlayer = new Label("Current Player: Player 1");
+		currPlayer.setFont(new Font("Arial", 18));
 		
-		moveDetails = new TextField();
-		moveDetails.setPrefWidth(50);
-		moveDetails.setEditable(false);
+		moveDetails = new Label("Move Details will post here.");
+		moveDetails.setFont(new Font("Arial", 18));
 		
-		
+		VBox borderTop = new VBox(menuBar, howToPlay, currPlayer,moveDetails);
+		// centering
 		gridpane.setAlignment(Pos.CENTER);
 		
-		
-		
 		VBox paneCenter = new VBox(currPlayer, moveDetails,gridpane);
-		// center the gridpane 
+		// center the grid pane 
 		paneCenter.setAlignment(Pos.CENTER);
 		pane.setCenter(paneCenter);
+		pane.setTop(borderTop);
 		
 		return new Scene(pane, 800,800);
 	}
@@ -372,18 +394,25 @@ public class JavaFXTemplate extends Application {
 	public Scene resultScene() {
 		
 		BorderPane pane = new BorderPane();
-		pane.setPadding(new Insets(300));
+		pane.setPadding(new Insets(50));
 		
-		resultText = new TextField();
-		resultText.setPrefWidth(80);
-		resultText.setEditable(false);
+		Image image = new Image ("youwon.jpg");
+		BackgroundSize bSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false);
+		Background bg = new Background(new BackgroundImage(image, BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.CENTER,bSize));
+		pane.setBackground(bg);
 		
-		VBox paneCenter = new VBox(playAgain, resultText);
-		pane.setCenter(paneCenter);
 		
-		// this has nothing just did so i can compile for now
+		// create label for win,
+		result = new Label("YOU WIN PLAYER " + GameLogic.getCurrPlayer());
+		result.setFont(new Font("Arial",20));
+	
+		pane.setTop(result);
+		pane.setBottom(playAgain);
+	
+		
 		return new Scene(pane, 800,800);
 	}
+	
 
 	
 
