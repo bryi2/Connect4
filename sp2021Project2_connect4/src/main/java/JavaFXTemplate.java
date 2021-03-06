@@ -27,6 +27,7 @@ import javafx.scene.layout.BackgroundSize;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -36,7 +37,7 @@ import javafx.util.Duration;
 public class JavaFXTemplate extends Application {
 	TextField resultText;
 	// label so we don't have borders around text
-	Label welcomeScreen, howToPlay, currPlayer, moveDetails, result, emptyStack;
+	Label welcomeScreen, howToPlay, currPlayer, moveDetails, result,resultTie, emptyStack;
 	HashMap<String, Scene> sceneMap;
 	BorderPane pane;
 	GridPane gridpane;
@@ -47,7 +48,7 @@ public class JavaFXTemplate extends Application {
 	// buttons for grid pane
 	GameButton[][] arr;
 	// welcome screen + result
-	Button playGameButton,playAgain;
+	Button playGameButton,playAgain, playAgainTie, exitWin, exitTie;
 	// sub menu
 	MenuItem exit, reverse,newGame,howTo,theme1,theme2,defaultTheme;
 	// using for pause transition between actions
@@ -71,6 +72,9 @@ public class JavaFXTemplate extends Application {
 		playGameButton = new Button("Play Connect Four!");
 		// button for result screen
 		playAgain = new Button("Play Again!");
+		playAgainTie = new Button("PlayAgain!");
+		exitWin = new Button("Exit Game");
+		exitTie = new Button("Exit Game");
 		// sub Menu
 		defaultTheme = new MenuItem("Default Theme");
 		theme1 = new MenuItem("Theme 1");
@@ -155,34 +159,25 @@ public class JavaFXTemplate extends Application {
 						but2.setText("W");
 						but3.setText("W");
 						but4.setText("W");
+						pause.setOnFinished( e -> { 
+							primaryStage.setScene(sceneMap.get("result"));
+							endOfGameReset(winSet, player, isWin);
+						});
+						pause.play();
+					
+					} else {
+						moveDetails.setText("Game is a Tie!");
+						pause.setOnFinished( e -> { 
+							primaryStage.setScene(sceneMap.get("tie"));
+							endOfGameReset(winSet, player, isWin);
+
+						});
+						pause.play();
+						}
 					}
-					pause.setOnFinished( e -> { 
-						primaryStage.setScene(sceneMap.get("result"));
-						for (int i = 0; i < winSet.length; i++)
-				        {
-				            for (int j = 0; (winSet[i] != null && j < winSet[i].length); j++)
-				                System.out.print(winSet[i][j] + " ");
-				        }
-						moveDetails.setText("");
-						gridpane.getChildren().clear();
-						newGrid(gridpane);
-						GameButton.reverse.clear();
-						// changed to player # because if they change theme the colors change according to background
-						// display result
-						GameLogic.clearLogicBoard();
-						if (player == 1){
-							result.setText("Player 1  won");
-						} else {
-							result.setText("Player 2 won");
-						}
-						if (!isWin) {
-							result.setText("Game was a tie!");
-						}
-					});
-					pause.play();
 				}
-			}
-		};
+			};
+		
 		
 		// lambda expression for when clicking reverse during game play
 		reverse.setOnAction(e-> { if (!GameButton.reverse.empty()) {
@@ -202,7 +197,6 @@ public class JavaFXTemplate extends Application {
 				currPlayer.setText("Current Player: Player 2");
 				color = "-fx-background-color:yellow;";
 			}
-			//GameLogic.changeCurrPlayer();
 			// update the previous buttons info
 			GameLogic.removeLogicBoard(x.getRow(), x.getColumn());
 			x.changeDisable(false);
@@ -249,7 +243,8 @@ public class JavaFXTemplate extends Application {
 		howTo.setOnAction(e -> {
 			// allows the text to go next line and not get chopped off
 			howToPlay.setWrapText(true);
-			howToPlay.setText("Welcome to Connect 4: Just like the game name the objective is to get 4 in a row. The rows can be done vertically, horizontally or diagonlly. "
+			howToPlay.setText("Welcome to Connect 4: \n"
+					+ "Just like the game name the objective is to get 4 in a row. The rows can be done vertically, horizontally or diagonlly. "
 					+ "Each turn, the player will get the chance to drop and make the row of his checkers. If you are the first player to get four of your checkers in a row, you win."
 					+ "Also, during your turn you have the option to reverse a move located in the Gameplay menu bar. However, choosing to reverse a move will behave as a turn and the player"
 					+ "prior to the most recent move will be chose to make a move.");
@@ -263,6 +258,15 @@ public class JavaFXTemplate extends Application {
 		
 		//create handler for the exit option in Options
 		exit.setOnAction(e -> {
+			System.exit(0);
+		});
+		
+		exitWin.setOnAction( e-> {
+			
+			System.exit(0);
+		});
+		exitTie.setOnAction( e-> {
+			
 			System.exit(0);
 		});
 		// create even handler for PlayGame Button from welcome screen and to play again after win/tie
@@ -279,12 +283,32 @@ public class JavaFXTemplate extends Application {
 		sceneMap.put("welcome", createWelcomeScene());
 		sceneMap.put("play",  mainGameScene());
 		sceneMap.put("result", resultScene());
+		sceneMap.put("tie", resultSceneTie());
 		// call on Hash map to invoke scenes
 		// but welcome is always invoked on startup
 		primaryStage.setScene(sceneMap.get("welcome"));
 		primaryStage.show();
 	}
-
+	public void endOfGameReset(int[][] winSet, int player, boolean isWin) {
+		for (int i = 0; i < winSet.length; i++)
+        {
+            for (int j = 0; (winSet[i] != null && j < winSet[i].length); j++)
+                System.out.print(winSet[i][j] + " ");
+        }
+		moveDetails.setText("");
+		gridpane.getChildren().clear();
+		newGrid(gridpane);
+		GameButton.reverse.clear();
+		GameLogic.clearLogicBoard();
+		if (player == 1){
+			result.setText("Player 2  won");
+		} else {
+			result.setText("Player 1 won");
+		}
+		if (!isWin) {
+			resultTie.setText("Game was a tie!");
+		}
+	}
 	// function to create and add grid 
 	public void newGrid( GridPane grid) {
 		for (int i = 0 ; i < 6; i++) {
@@ -357,6 +381,10 @@ public class JavaFXTemplate extends Application {
 		// initialize grid pane with buttons
 		gridpane = new GridPane();
 		newGrid(gridpane);
+		// space in between panes
+		gridpane.setHgap(5);
+		gridpane.setVgap(5);
+		
 		
 		//gridpane.setAlignment(center);
 	    pane = new BorderPane();
@@ -380,11 +408,11 @@ public class JavaFXTemplate extends Application {
 		emptyStack = new Label();
 		emptyStack.setFont(new Font("Arial", 18));
 		
-		VBox borderTop = new VBox(menuBar, howToPlay, currPlayer,moveDetails,emptyStack);
+		VBox borderTop = new VBox(menuBar, howToPlay);
 		// centering
 		gridpane.setAlignment(Pos.CENTER);
 		
-		VBox paneCenter = new VBox(currPlayer, moveDetails,gridpane);
+		VBox paneCenter = new VBox(currPlayer, moveDetails,emptyStack,gridpane);
 		// center the grid pane 
 		paneCenter.setAlignment(Pos.CENTER);
 		pane.setCenter(paneCenter);
@@ -402,17 +430,33 @@ public class JavaFXTemplate extends Application {
 		BackgroundSize bSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false);
 		Background bg = new Background(new BackgroundImage(image, BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.CENTER,bSize));
 		pane.setBackground(bg);
-		
-		
-		// create label for win,
-		result = new Label("YOU WIN PLAYER " + GameLogic.getCurrPlayer());
+		// label for win case
+		result = new Label("");
 		result.setFont(new Font("Arial",20));
-	
-		pane.setTop(result);
-		pane.setBottom(playAgain);
-	
 		
-		return new Scene(pane, 800,540);
+		HBox paneBottom = new HBox(playAgain, exitWin);
+		pane.setTop(result);
+		pane.setBottom(paneBottom);
+		return new Scene(pane, 800,620);
+	}
+	
+	public Scene resultSceneTie() {
+		BorderPane pane = new BorderPane();
+		pane.setPadding(new Insets(50));
+		
+		Image image = new Image ("gameOver.jpg");
+		BackgroundSize bSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false);
+		Background bg = new Background(new BackgroundImage(image, BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.CENTER,bSize));
+		pane.setBackground(bg);
+		// label for tie
+		resultTie = new Label("");
+		resultTie.setFont(new Font("Arial",20));
+		
+		HBox paneBottom = new HBox(playAgainTie, exitTie);
+		pane.setTop(resultTie);
+		pane.setBottom(paneBottom);
+
+		return new Scene(pane, 800,620);
 	}
 	
 
