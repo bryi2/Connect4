@@ -134,6 +134,7 @@ public class JavaFXTemplate extends Application {
 				} else {
 					// invalid move
 					moveDetails.setText("");
+					currPlayer.setText("Current Player: " + prevPlayer(player));
 					moveDetails.setText("Player " + prevPlayer(player) + " ["+row+","+column + "] is NOT a valid move. Pick Again!");
 					
 				}
