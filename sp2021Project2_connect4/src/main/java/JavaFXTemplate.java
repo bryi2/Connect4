@@ -159,7 +159,10 @@ public class JavaFXTemplate extends Application {
 						but3.setText("W");
 						but4.setText("W");
 						disableGrid(arr);
+<<<<<<< HEAD
 						// pause transitions leading to result depending on win/tie
+=======
+>>>>>>> 3dfbe0b0fcd8068fa11aafe3f67f7b9e83ff6576
 						pause.setOnFinished( e -> {
 							playGameButton.setOnAction(g -> primaryStage.setScene(sceneMap.get("result")));
 							primaryStage.setScene(sceneMap.get("result"));
