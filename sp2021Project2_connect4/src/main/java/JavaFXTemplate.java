@@ -1,4 +1,3 @@
-
 import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Stack;
@@ -30,6 +29,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -144,10 +144,9 @@ public class JavaFXTemplate extends Application {
 					moveDetails.setText("Player " + prevPlayer(player) + " ["+row+","+column + "] is NOT a valid move. Pick Again!");
 					
 				}
-				
 				// we have to invoke the scene instead of just printing it out
 				if (winner || GameButton.reverse.size() > 41){
-					// should pause the scene before showing result
+					// obtain winning combo to show winning set
 					int[][] winSet = GameLogic.getWinningSet();;
 					boolean isWin = winner;
 					if (winner) {
@@ -159,10 +158,14 @@ public class JavaFXTemplate extends Application {
 						but2.setText("W");
 						but3.setText("W");
 						but4.setText("W");
-						pause.setOnFinished( e -> { 
+						disableGrid(arr);
+						// pause transitions leading to result depending on win/tie
+						pause.setOnFinished( e -> {
+							playGameButton.setOnAction(g -> primaryStage.setScene(sceneMap.get("result")));
 							primaryStage.setScene(sceneMap.get("result"));
 							endOfGameReset(winSet, player, isWin);
 						});
+						
 						pause.play();
 					
 					} else {
@@ -179,17 +182,17 @@ public class JavaFXTemplate extends Application {
 			};
 		
 		
-		// lambda expression for when clicking reverse during game play
+		// reverse option for gameplay
 		reverse.setOnAction(e-> { if (!GameButton.reverse.empty()) {
 			GameButton x = GameButton.reverse.pop();
 			
 			System.out.println("heres the previous row and col: " + x.getRow() + x.getColumn());
 			// update the GUI to the color
-			// we get an error here on java fx , TA said to just use background color we can change later
 			x.setStyle ("-fx-base: # f4f162");
 			
 			int player = GameLogic.getCurrPlayer();
 			String color; 
+			// update player details
 			if (player == 1) { // player 1
 				currPlayer.setText("Current Player: Player 1");
 				color = "-fx-background-color:red;";
@@ -221,6 +224,7 @@ public class JavaFXTemplate extends Application {
 		theme2.setOnAction(e -> {
 			pane.setBackground(new Background(new BackgroundFill(Color.CADETBLUE, CornerRadii.EMPTY, Insets.EMPTY)));
 		});
+		// add default in case user wants to go back to original
 		defaultTheme.setOnAction(e -> {
 			pane.setBackground(new Background(new BackgroundFill(Color.DARKSEAGREEN, CornerRadii.EMPTY, Insets.EMPTY)));
 		});
@@ -247,7 +251,7 @@ public class JavaFXTemplate extends Application {
 					+ "Just like the game name the objective is to get 4 in a row. The rows can be done vertically, horizontally or diagonlly. "
 					+ "Each turn, the player will get the chance to drop and make the row of his checkers. If you are the first player to get four of your checkers in a row, you win."
 					+ "Also, during your turn you have the option to reverse a move located in the Gameplay menu bar. However, choosing to reverse a move will behave as a turn and the player"
-					+ "prior to the most recent move will be chose to make a move.");
+					+ " prior to the most recent move will be chose to make a move.");
 			// set a pause for 15 seconds and then remove game play instructions
 			howToPlayPause.setOnFinished(s -> {
 				// set to blank screen
@@ -256,7 +260,7 @@ public class JavaFXTemplate extends Application {
 				howToPlayPause.play();
 		});
 		
-		//create handler for the exit option in Options
+		//create handler for all the exit options
 		exit.setOnAction(e -> {
 			System.exit(0);
 		});
@@ -289,6 +293,7 @@ public class JavaFXTemplate extends Application {
 		primaryStage.setScene(sceneMap.get("welcome"));
 		primaryStage.show();
 	}
+	// clear board and show result
 	public void endOfGameReset(int[][] winSet, int player, boolean isWin) {
 		for (int i = 0; i < winSet.length; i++)
         {
@@ -315,6 +320,7 @@ public class JavaFXTemplate extends Application {
 			for (int j = 0 ; j< 7; j++) {
 				GameButton b1 = new GameButton(i,j);
 				// set default button color
+				b1.setShape(new Circle(1.5));
 				b1.setMinSize(50,45);
 				b1.setOnAction(checkPosition);
 				arr[i][j] = b1;
@@ -322,7 +328,15 @@ public class JavaFXTemplate extends Application {
 			}
 		}
 	}
-	
+	public void disableGrid(GameButton[][] arr) {
+		for (int i = 0 ; i < 6; i++) {
+			for (int j = 0 ; j< 7; j++) {
+				GameButton b1 = arr[i][j];
+				b1.setDisable(true);
+			}
+		}
+		
+	}
 	// function for previous player# for move details
 	public int prevPlayer(int currPlayer) {
 		if (currPlayer ==1) {
@@ -358,13 +372,13 @@ public class JavaFXTemplate extends Application {
 	
 		// create and insert background image
 		Image image = new Image ("connect4.jpg");
-		BackgroundSize bSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false);
-		Background background = new Background(new BackgroundImage(image, BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.CENTER,bSize));
+		BackgroundSize bS = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false);
+		Background bG = new Background(new BackgroundImage(image, BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.CENTER,bS));
 		// vertical placement order
 		VBox paneCenter = new VBox(10, welcomeScreen);
 		// pane placement
-		welcomePane.setBackground(background);
-		//pane.setCenter(paneCenter);
+		welcomePane.setBackground(bG);
+	
 		welcomePane.setBottom(playGameButton);
 		welcomePane.setTop(paneCenter);
 	
@@ -425,10 +439,10 @@ public class JavaFXTemplate extends Application {
 		
 		BorderPane pane = new BorderPane();
 		pane.setPadding(new Insets(50));
-		
+		// winning image
 		Image image = new Image ("youwon.jpg");
-		BackgroundSize bSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false);
-		Background bg = new Background(new BackgroundImage(image, BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.CENTER,bSize));
+		BackgroundSize bS = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false);
+		Background bg = new Background(new BackgroundImage(image, BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.CENTER,bS));
 		pane.setBackground(bg);
 		// label for win case
 		result = new Label("");
@@ -443,10 +457,10 @@ public class JavaFXTemplate extends Application {
 	public Scene resultSceneTie() {
 		BorderPane pane = new BorderPane();
 		pane.setPadding(new Insets(50));
-		
+		// set image for tie situation
 		Image image = new Image ("gameOver.jpg");
-		BackgroundSize bSize = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false);
-		Background bg = new Background(new BackgroundImage(image, BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.CENTER,bSize));
+		BackgroundSize bS = new BackgroundSize(BackgroundSize.AUTO, BackgroundSize.AUTO, false, false, true, false);
+		Background bg = new Background(new BackgroundImage(image, BackgroundRepeat.NO_REPEAT,BackgroundRepeat.NO_REPEAT,BackgroundPosition.CENTER,bS));
 		pane.setBackground(bg);
 		// label for tie
 		resultTie = new Label("");

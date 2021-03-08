@@ -22,7 +22,7 @@ public class GameLogic  {
 		// increment currPlayer each valid move
 		currentPlayer++;
 		if (getCurrPlayer() == 2) {
-			System.out.println("Inside add, for player 2");
+			
 			logicBoard[row][column] = 2;
 		} else {
 		// if player#1 fill spot with 1
