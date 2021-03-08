@@ -30,6 +30,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -159,10 +160,13 @@ public class JavaFXTemplate extends Application {
 						but2.setText("W");
 						but3.setText("W");
 						but4.setText("W");
-						pause.setOnFinished( e -> { 
+						disableGrid(arr);
+						pause.setOnFinished( e -> {
+							playGameButton.setOnAction(g -> primaryStage.setScene(sceneMap.get("result")));
 							primaryStage.setScene(sceneMap.get("result"));
 							endOfGameReset(winSet, player, isWin);
 						});
+						
 						pause.play();
 					
 					} else {
@@ -315,6 +319,7 @@ public class JavaFXTemplate extends Application {
 			for (int j = 0 ; j< 7; j++) {
 				GameButton b1 = new GameButton(i,j);
 				// set default button color
+				b1.setShape(new Circle(1.5));
 				b1.setMinSize(50,45);
 				b1.setOnAction(checkPosition);
 				arr[i][j] = b1;
@@ -322,7 +327,15 @@ public class JavaFXTemplate extends Application {
 			}
 		}
 	}
-	
+	public void disableGrid(GameButton[][] arr) {
+		for (int i = 0 ; i < 6; i++) {
+			for (int j = 0 ; j< 7; j++) {
+				GameButton b1 = arr[i][j];
+				b1.setDisable(true);
+			}
+		}
+		
+	}
 	// function for previous player# for move details
 	public int prevPlayer(int currPlayer) {
 		if (currPlayer ==1) {
